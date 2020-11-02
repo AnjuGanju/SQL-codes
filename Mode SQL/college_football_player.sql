@@ -75,4 +75,33 @@ CASE WHEN year = 'SR' or year ='JR' THEN player_name
             ELSE 'under 70' END AS height_group
   FROM benn.college_football_players
 
-  
+
+
+/*
+Write a query that shows the number of players
+ at schools with names that start with A through M,
+ and the number at schools with names starting with N - Z.
+ */
+
+  SELECT
+SUM(CASE WHEN SUBSTRING(full_school_name,1,1) IN ('A','B','C','D','E','F','G','H','I','J','K','L','M') THEN 1 ELSE 0 END) as AM,
+SUM(CASE WHEN SUBSTRING(full_school_name,1,1) IN ('N','O','P','Q','R','T','S','U','V','W','X','Y','Z') THEN 1 ELSE 0 END) as NZ
+FROM benn.college_football_players
+
+SELECT CASE WHEN school_name < 'n' THEN 'A-M'
+WHEN school_name >= 'n' THEN 'N-Z'
+ELSE NULL END AS school_name_group,
+COUNT(1) AS players
+  FROM benn.college_football_players
+ GROUP BY 1
+
+
+ /*
+ Write a query that displays player names, school names and conferences for schools
+ in the "FBS (Division I-A Teams)" division. */
+
+ SELECT p.player_name, p.school_name, t.conference
+ FROM benn.college_football_players p
+ INNER JOIN benn.college_football_teams t
+ ON p.school_name = t.school_name
+ WHERE t.division = 'FBS (Division I-A Teams)'
