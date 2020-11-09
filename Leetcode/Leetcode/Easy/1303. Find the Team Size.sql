@@ -1,73 +1,64 @@
 /*
-Table: Prices
+SQL Schema
+Table: Employee
 
 +---------------+---------+
 | Column Name   | Type    |
 +---------------+---------+
-| product_id    | int     |
-| start_date    | date    |
-| end_date      | date    |
-| price         | int     |
+| employee_id   | int     |
+| team_id       | int     |
 +---------------+---------+
-(product_id, start_date, end_date) is the primary key for this table.
-Each row of this table indicates the price of the product_id in the period from start_date to end_date.
-For each product_id there will be no two overlapping periods. That means there will be no two intersecting periods for the same product_id.
+employee_id is the primary key for this table.
+Each row of this table contains the ID of each employee and their respective team.
+Write an SQL query to find the team size of each of the employees.
 
-
-Table: UnitsSold
-
-+---------------+---------+
-| Column Name   | Type    |
-+---------------+---------+
-| product_id    | int     |
-| purchase_date | date    |
-| units         | int     |
-+---------------+---------+
-There is no primary key for this table, it may contain duplicates.
-Each row of this table indicates the date, units and product_id of each product sold.
-
-
-Write an SQL query to find the average selling price for each product.
-
-average_price should be rounded to 2 decimal places.
+Return result table in any order.
 
 The query result format is in the following example:
 
-Prices table:
-+------------+------------+------------+--------+
-| product_id | start_date | end_date   | price  |
-+------------+------------+------------+--------+
-| 1          | 2019-02-17 | 2019-02-28 | 5      |
-| 1          | 2019-03-01 | 2019-03-22 | 20     |
-| 2          | 2019-02-01 | 2019-02-20 | 15     |
-| 2          | 2019-02-21 | 2019-03-31 | 30     |
-+------------+------------+------------+--------+
-
-UnitsSold table:
-+------------+---------------+-------+
-| product_id | purchase_date | units |
-+------------+---------------+-------+
-| 1          | 2019-02-25    | 100   |
-| 1          | 2019-03-01    | 15    |
-| 2          | 2019-02-10    | 200   |
-| 2          | 2019-03-22    | 30    |
-+------------+---------------+-------+
-
+Employee Table:
++-------------+------------+
+| employee_id | team_id    |
++-------------+------------+
+|     1       |     8      |
+|     2       |     8      |
+|     3       |     8      |
+|     4       |     7      |
+|     5       |     9      |
+|     6       |     9      |
++-------------+------------+
 Result table:
-+------------+---------------+
-| product_id | average_price |
-+------------+---------------+
-| 1          | 6.96          |
-| 2          | 16.96         |
-+------------+---------------+
-Average selling price = Total Price of Product / Number of products sold.
-Average selling price for product 1 = ((100 * 5) + (15 * 20)) / 115 = 6.96
-Average selling price for product 2 = ((200 * 15) + (30 * 30)) / 230 = 16.96
++-------------+------------+
+| employee_id | team_size  |
++-------------+------------+
+|     1       |     3      |
+|     2       |     3      |
+|     3       |     3      |
+|     4       |     1      |
+|     5       |     2      |
+|     6       |     2      |
++-------------+------------+
+Employees with Id 1,2,3 are part of a team with team_id = 8.
+Employees with Id 4 is part of a team with team_id = 7.
+Employees with Id 5,6 are part of a team with team_id = 9.
+
 */
 
-SELECT p.product_id, ROUND(SUM(p.price*u.units)/SUM(u.units),2) as average_price
-FROM prices p
-INNER JOIN unitssold u
-USING(product_id)
-WHERE purchase_date BETWEEN start_date AND end_date
-GROUP BY p.product_id
+WITH CTE
+AS
+(
+SELECT *,
+COUNT(employee_id) OVER (PARTITION BY team_id) as team_size
+FROM employee
+)
+SELECT employee_id,  team_size
+FROM CTE
+ORDER BY employee_id
+
+
+SELECT e.employee_id,
+(SELECT COUNT(team_id)
+FROM employee
+WHERE e.team_id = team_id
+GROUP BY team_id) as team_size
+FROM employee e

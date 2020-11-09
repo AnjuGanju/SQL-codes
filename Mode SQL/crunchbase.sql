@@ -43,3 +43,17 @@ ON companies.permalink = acquisitions.company_permalink
  WHERE companies.state_code IS NOT NULL
  GROUP BY 1
  ORDER BY 3 DESC
+
+ /*
+ Write a query that shows a company's name, "status" (found in the Companies table),
+ and the number of unique investors in that company. Order by the number of investors
+ from most to fewest. Limit to only companies in the state of New York.
+ */
+
+SELECT ci.company_name, cc.status, COUNT(DISTINCT ci.investor_name) as unique_investors
+FROM tutorial.crunchbase_investments ci
+LEFT JOIN tutorial.crunchbase_companies cc
+ON ci.company_permalink = cc.permalink
+WHERE company_state_code = 'NY'
+GROUP BY 1, 2
+ORDER BY 3 DESC

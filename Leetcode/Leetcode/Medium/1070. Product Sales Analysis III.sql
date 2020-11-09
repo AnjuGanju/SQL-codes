@@ -1,32 +1,76 @@
 /*
 SQL Schema
-Write a SQL query to rank scores. If there is a tie between two scores, both should have the same ranking. Note that after a tie, the next ranking number should be the next consecutive integer value. In other words, there should be no "holes" between ranks.
+Table: Sales
 
-+----+-------+
-| Id | Score |
-+----+-------+
-| 1  | 3.50  |
-| 2  | 3.65  |
-| 3  | 4.00  |
-| 4  | 3.85  |
-| 5  | 4.00  |
-| 6  | 3.65  |
-+----+-------+
-For example, given the above Scores table, your query should generate the following report (order by highest score):
++-------------+-------+
+| Column Name | Type  |
++-------------+-------+
+| sale_id     | int   |
+| product_id  | int   |
+| year        | int   |
+| quantity    | int   |
+| price       | int   |
++-------------+-------+
+sale_id is the primary key of this table.
+product_id is a foreign key to Product table.
+Note that the price is per unit.
+Table: Product
 
-+-------+---------+
-| score | Rank    |
-+-------+---------+
-| 4.00  | 1       |
-| 4.00  | 1       |
-| 3.85  | 2       |
-| 3.65  | 3       |
-| 3.65  | 3       |
-| 3.50  | 4       |
-+-------+---------+
-Important Note: For MySQL solutions, to escape reserved words used as column names, you can use an apostrophe before and after the keyword. For example `Rank`.
++--------------+---------+
+| Column Name  | Type    |
++--------------+---------+
+| product_id   | int     |
+| product_name | varchar |
++--------------+---------+
+product_id is the primary key of this table.
+
+
+Write an SQL query that selects the product id, year, quantity, and price for the first year of every product sold.
+
+The query result format is in the following example:
+
+Sales table:
++---------+------------+------+----------+-------+
+| sale_id | product_id | year | quantity | price |
++---------+------------+------+----------+-------+
+| 1       | 100        | 2008 | 10       | 5000  |
+| 2       | 100        | 2009 | 12       | 5000  |
+| 7       | 200        | 2011 | 15       | 9000  |
++---------+------------+------+----------+-------+
+
+Product table:
++------------+--------------+
+| product_id | product_name |
++------------+--------------+
+| 100        | Nokia        |
+| 200        | Apple        |
+| 300        | Samsung      |
++------------+--------------+
+
+Result table:
++------------+------------+----------+-------+
+| product_id | first_year | quantity | price |
++------------+------------+----------+-------+
+| 100        | 2008       | 10       | 5000  |
+| 200        | 2011       | 15       | 9000  |
++------------+------------+----------+-------+
 */
 
-SELECT score,
-DENSE_RANK() OVER (ORDER BY score DESC) as 'Rank'
-FROM scores
+WITH CTE
+AS
+(
+SELECT sale_id, product_id, year, quantity, price,
+RANK() OVER (PARTITION BY product_id ORDER BY year) as ranker
+FROM sales s
+)
+SELECT CTE.product_id, CTE.year as first_year, CTE.quantity, CTE.price
+FROM CTE
+WHERE ranker = 1
+
+
+SELECT product_id, year AS first_year, quantity, price
+FROM Sales
+WHERE (product_id,year) IN
+(SELECT product_id, MIN(year)
+FROM sales
+GROUP BY product_id)

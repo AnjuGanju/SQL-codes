@@ -1,34 +1,44 @@
 /*
 SQL Schema
-Table: Person
+Suppose that a website contains two tables, the Customers table and the Orders table. Write a SQL query to find all customers who never order anything.
 
-+-------------+---------+
-| Column Name | Type    |
-+-------------+---------+
-| PersonId    | int     |
-| FirstName   | varchar |
-| LastName    | varchar |
-+-------------+---------+
-PersonId is the primary key column for this table.
-Table: Address
+Table: Customers.
 
-+-------------+---------+
-| Column Name | Type    |
-+-------------+---------+
-| AddressId   | int     |
-| PersonId    | int     |
-| City        | varchar |
-| State       | varchar |
-+-------------+---------+
-AddressId is the primary key column for this table.
++----+-------+
+| Id | Name  |
++----+-------+
+| 1  | Joe   |
+| 2  | Henry |
+| 3  | Sam   |
+| 4  | Max   |
++----+-------+
+Table: Orders.
 
++----+------------+
+| Id | CustomerId |
++----+------------+
+| 1  | 3          |
+| 2  | 1          |
++----+------------+
+Using the above tables as example, return the following:
 
-Write a SQL query for a report that provides the following information for each person in the Person table, regardless if there is an address for each of those people:
-
-FirstName, LastName, City, State
++-----------+
+| Customers |
++-----------+
+| Henry     |
+| Max       |
++-----------+
 */
 
-SELECT p.FirstName, p.LastName, a.city, a.state
-FROM person p
-LEFT JOIN address a
-ON p.personid = a.personid
+SELECT name as Customers
+FROM customers
+WHERE id NOT IN
+(SELECT DISTINCT customerid
+FROM orders)
+
+
+SELECT name as customers
+FROM customers c
+LEFT JOIN orders o
+ON c.id = o.customerid
+WHERE o.customerid IS NULL
