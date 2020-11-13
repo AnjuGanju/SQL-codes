@@ -1,45 +1,55 @@
 /*
 SQL Schema
-Query the customer_number from the orders table for the customer who has placed the largest number of orders.
+Table: Actions
 
-It is guaranteed that exactly one customer will have placed more orders than any other customer.
++---------------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| user_id       | int     |
+| post_id       | int     |
+| action_date   | date    |
+| action        | enum    |
+| extra         | varchar |
++---------------+---------+
+There is no primary key for this table, it may have duplicate rows.
+The action column is an ENUM type of ('view', 'like', 'reaction', 'comment', 'report', 'share').
+The extra column has optional information about the action such as a reason for report or a type of reaction.
 
-The orders table is defined as follows:
 
-| Column            | Type      |
-|-------------------|-----------|
-| order_number (PK) | int       |
-| customer_number   | int       |
-| order_date        | date      |
-| required_date     | date      |
-| shipped_date      | date      |
-| status            | char(15)  |
-| comment           | char(200) |
-Sample Input
+Write an SQL query that reports the number of posts reported yesterday for each report reason. Assume today is 2019-07-05.
 
-| order_number | customer_number | order_date | required_date | shipped_date | status | comment |
-|--------------|-----------------|------------|---------------|--------------|--------|---------|
-| 1            | 1               | 2017-04-09 | 2017-04-13    | 2017-04-12   | Closed |         |
-| 2            | 2               | 2017-04-15 | 2017-04-20    | 2017-04-18   | Closed |         |
-| 3            | 3               | 2017-04-16 | 2017-04-25    | 2017-04-20   | Closed |         |
-| 4            | 3               | 2017-04-18 | 2017-04-28    | 2017-04-25   | Closed |         |
-Sample Output
+The query result format is in the following example:
 
-| customer_number |
-|-----------------|
-| 3               |
-Explanation
+Actions table:
++---------+---------+-------------+--------+--------+
+| user_id | post_id | action_date | action | extra  |
++---------+---------+-------------+--------+--------+
+| 1       | 1       | 2019-07-01  | view   | null   |
+| 1       | 1       | 2019-07-01  | like   | null   |
+| 1       | 1       | 2019-07-01  | share  | null   |
+| 2       | 4       | 2019-07-04  | view   | null   |
+| 2       | 4       | 2019-07-04  | report | spam   |
+| 3       | 4       | 2019-07-04  | view   | null   |
+| 3       | 4       | 2019-07-04  | report | spam   |
+| 4       | 3       | 2019-07-02  | view   | null   |
+| 4       | 3       | 2019-07-02  | report | spam   |
+| 5       | 2       | 2019-07-04  | view   | null   |
+| 5       | 2       | 2019-07-04  | report | racism |
+| 5       | 5       | 2019-07-04  | view   | null   |
+| 5       | 5       | 2019-07-04  | report | racism |
++---------+---------+-------------+--------+--------+
 
-The customer with number '3' has two orders, which is greater than either customer '1' or '2' because each of them  only has one order.
-So the result is customer_number '3'.
+Result table:
++---------------+--------------+
+| report_reason | report_count |
++---------------+--------------+
+| spam          | 1            |
+| racism        | 2            |
++---------------+--------------+
+Note that we only care about report reasons with non zero number of reports.
 */
 
-SELECT x.customer_number
-FROM
-(
-SELECT COUNT(order_number), customer_number
-FROM orders
-GROUP BY customer_number
-ORDER BY 1 DESC
-LIMIT 1
-)x
+SELECT extra as report_reason, COUNT(DISTINCT post_id) as report_count
+FROM actions
+WHERE action ='report' AND DATEDIFF('2019-07-05',action_date)=1
+GROUP BY extra

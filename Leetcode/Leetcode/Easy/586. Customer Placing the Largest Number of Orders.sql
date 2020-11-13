@@ -43,3 +43,9 @@ GROUP BY customer_number
 ORDER BY 1 DESC
 LIMIT 1
 )x
+
+SELECT customer_number
+FROM orders
+GROUP BY customer_number
+ORDER BY COUNT(order_number) DESC
+LIMIT 1

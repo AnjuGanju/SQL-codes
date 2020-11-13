@@ -1,93 +1,46 @@
-/*
-Table: Products
-
-+------------------+---------+
-| Column Name      | Type    |
-+------------------+---------+
-| product_id       | int     |
-| product_name     | varchar |
-| product_category | varchar |
-+------------------+---------+
-product_id is the primary key for this table.
-This table contains data about the company's products.
-Table: Orders
+SQL Schema
+Table: Views
 
 +---------------+---------+
 | Column Name   | Type    |
 +---------------+---------+
-| product_id    | int     |
-| order_date    | date    |
-| unit          | int     |
+| article_id    | int     |
+| author_id     | int     |
+| viewer_id     | int     |
+| view_date     | date    |
 +---------------+---------+
-There is no primary key for this table. It may have duplicate rows.
-product_id is a foreign key to Products table.
-unit is the number of products ordered in order_date.
+There is no primary key for this table, it may have duplicate rows.
+Each row of this table indicates that some viewer viewed an article (written by some author) on some date.
+Note that equal author_id and viewer_id indicate the same person.
 
 
-Write an SQL query to get the names of products with greater than or equal to 100 units ordered in February 2020 and their amount.
-
-Return result table in any order.
+Write an SQL query to find all the authors that viewed at least one of their own articles, sorted in ascending order by their id.
 
 The query result format is in the following example:
 
-
-
-Products table:
-+-------------+-----------------------+------------------+
-| product_id  | product_name          | product_category |
-+-------------+-----------------------+------------------+
-| 1           | Leetcode Solutions    | Book             |
-| 2           | Jewels of Stringology | Book             |
-| 3           | HP                    | Laptop           |
-| 4           | Lenovo                | Laptop           |
-| 5           | Leetcode Kit          | T-shirt          |
-+-------------+-----------------------+------------------+
-
-Orders table:
-+--------------+--------------+----------+
-| product_id   | order_date   | unit     |
-+--------------+--------------+----------+
-| 1            | 2020-02-05   | 60       |
-| 1            | 2020-02-10   | 70       |
-| 2            | 2020-01-18   | 30       |
-| 2            | 2020-02-11   | 80       |
-| 3            | 2020-02-17   | 2        |
-| 3            | 2020-02-24   | 3        |
-| 4            | 2020-03-01   | 20       |
-| 4            | 2020-03-04   | 30       |
-| 4            | 2020-03-04   | 60       |
-| 5            | 2020-02-25   | 50       |
-| 5            | 2020-02-27   | 50       |
-| 5            | 2020-03-01   | 50       |
-+--------------+--------------+----------+
+Views table:
++------------+-----------+-----------+------------+
+| article_id | author_id | viewer_id | view_date  |
++------------+-----------+-----------+------------+
+| 1          | 3         | 5         | 2019-08-01 |
+| 1          | 3         | 6         | 2019-08-02 |
+| 2          | 7         | 7         | 2019-08-01 |
+| 2          | 7         | 6         | 2019-08-02 |
+| 4          | 7         | 1         | 2019-07-22 |
+| 3          | 4         | 4         | 2019-07-21 |
+| 3          | 4         | 4         | 2019-07-21 |
++------------+-----------+-----------+------------+
 
 Result table:
-+--------------------+---------+
-| product_name       | unit    |
-+--------------------+---------+
-| Leetcode Solutions | 130     |
-| Leetcode Kit       | 100     |
-+--------------------+---------+
-
-Products with product_id = 1 is ordered in February a total of (60 + 70) = 130.
-Products with product_id = 2 is ordered in February a total of 80.
-Products with product_id = 3 is ordered in February a total of (2 + 3) = 5.
-Products with product_id = 4 was not ordered in February 2020.
-Products with product_id = 5 is ordered in February a total of (50 + 50) = 100.
++------+
+| id   |
++------+
+| 4    |
+| 7    |
++------+
 */
 
-SELECT p.product_name, SUM(o.unit) as unit
-FROM products p
-INNER JOIN orders o
-USING(product_id)
-WHERE MONTH(order_date)=2 AND YEAR(order_date)=2020
-GROUP BY p.product_id
-HAVING SUM(o.unit) >= 100
-
-SELECT p.product_name, SUM(o.unit) as unit
-FROM products p
-INNER JOIN orders o
-USING(product_id)
-WHERE LEFT(order_date,7)='2020-02'
-GROUP BY p.product_id
-HAVING SUM(o.unit) >= 100
+SELECT DISTINCT author_id as id
+FROM views
+WHERE author_id = viewer_id
+ORDER BY 1

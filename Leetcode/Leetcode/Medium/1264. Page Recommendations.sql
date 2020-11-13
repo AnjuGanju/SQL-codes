@@ -1,76 +1,84 @@
 /*
 SQL Schema
-Table: Sales
+Table: Friendship
 
-+-------------+-------+
-| Column Name | Type  |
-+-------------+-------+
-| sale_id     | int   |
-| product_id  | int   |
-| year        | int   |
-| quantity    | int   |
-| price       | int   |
-+-------------+-------+
-sale_id is the primary key of this table.
-product_id is a foreign key to Product table.
-Note that the price is per unit.
-Table: Product
-
-+--------------+---------+
-| Column Name  | Type    |
-+--------------+---------+
-| product_id   | int     |
-| product_name | varchar |
-+--------------+---------+
-product_id is the primary key of this table.
++---------------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| user1_id      | int     |
+| user2_id      | int     |
++---------------+---------+
+(user1_id, user2_id) is the primary key for this table.
+Each row of this table indicates that there is a friendship relation between user1_id and user2_id.
 
 
-Write an SQL query that selects the product id, year, quantity, and price for the first year of every product sold.
+Table: Likes
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| user_id     | int     |
+| page_id     | int     |
++-------------+---------+
+(user_id, page_id) is the primary key for this table.
+Each row of this table indicates that user_id likes page_id.
+
+
+Write an SQL query to recommend pages to the user with user_id = 1 using the pages that your friends liked. It should not recommend pages you already liked.
+
+Return result table in any order without duplicates.
 
 The query result format is in the following example:
 
-Sales table:
-+---------+------------+------+----------+-------+
-| sale_id | product_id | year | quantity | price |
-+---------+------------+------+----------+-------+
-| 1       | 100        | 2008 | 10       | 5000  |
-| 2       | 100        | 2009 | 12       | 5000  |
-| 7       | 200        | 2011 | 15       | 9000  |
-+---------+------------+------+----------+-------+
+Friendship table:
++----------+----------+
+| user1_id | user2_id |
++----------+----------+
+| 1        | 2        |
+| 1        | 3        |
+| 1        | 4        |
+| 2        | 3        |
+| 2        | 4        |
+| 2        | 5        |
+| 6        | 1        |
++----------+----------+
 
-Product table:
-+------------+--------------+
-| product_id | product_name |
-+------------+--------------+
-| 100        | Nokia        |
-| 200        | Apple        |
-| 300        | Samsung      |
-+------------+--------------+
+Likes table:
++---------+---------+
+| user_id | page_id |
++---------+---------+
+| 1       | 88      |
+| 2       | 23      |
+| 3       | 24      |
+| 4       | 56      |
+| 5       | 11      |
+| 6       | 33      |
+| 2       | 77      |
+| 3       | 77      |
+| 6       | 88      |
++---------+---------+
 
 Result table:
-+------------+------------+----------+-------+
-| product_id | first_year | quantity | price |
-+------------+------------+----------+-------+
-| 100        | 2008       | 10       | 5000  |
-| 200        | 2011       | 15       | 9000  |
-+------------+------------+----------+-------+
++------------------+
+| recommended_page |
++------------------+
+| 23               |
+| 24               |
+| 56               |
+| 33               |
+| 77               |
++------------------+
+User one is friend with users 2, 3, 4 and 6.
+Suggested pages are 23 from user 2, 24 from user 3, 56 from user 3 and 33 from user 6.
+Page 77 is suggested from both user 2 and user 3.
+Page 88 is not suggested because user 1 already likes it.
 */
 
-WITH CTE
-AS
-(
-SELECT sale_id, product_id, year, quantity, price,
-RANK() OVER (PARTITION BY product_id ORDER BY year) as ranker
-FROM sales s
-)
-SELECT CTE.product_id, CTE.year as first_year, CTE.quantity, CTE.price
-FROM CTE
-WHERE ranker = 1
-
-
-SELECT product_id, year AS first_year, quantity, price
-FROM Sales
-WHERE (product_id,year) IN
-(SELECT product_id, MIN(year)
-FROM sales
-GROUP BY product_id)
+SELECT DISTINCT page_id as recommended_page
+FROM likes
+WHERE user_id IN (SELECT
+ CASE WHEN user1_id =1 THEN user2_id
+      WHEN user2_id = 1 THEN user1_id
+ END as user_id
+FROM friendship)
+AND page_id NOT IN (SELECT page_id FROM likes WHERE user_id = 1)

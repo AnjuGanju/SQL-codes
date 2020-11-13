@@ -29,3 +29,13 @@ INNER JOIN point b
 ON a.x <> b.x
 ORDER BY 1
 LIMIT 1
+
+SELECT MIN(ABS(a.x - b.x)) as shortest
+FROM point a
+INNER JOIN point b
+ON a.x <> b.x
+
+SELECT MIN(ABS(a.x - b.x)) as shortest
+FROM point a
+INNER JOIN point b
+ON a.x < b.x

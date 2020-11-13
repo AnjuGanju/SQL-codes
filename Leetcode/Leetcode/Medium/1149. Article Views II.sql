@@ -1,42 +1,49 @@
 /*
 SQL Schema
-Table: Candidate
+Table: Views
 
-+-----+---------+
-| id  | Name    |
-+-----+---------+
-| 1   | A       |
-| 2   | B       |
-| 3   | C       |
-| 4   | D       |
-| 5   | E       |
-+-----+---------+
-Table: Vote
++---------------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| article_id    | int     |
+| author_id     | int     |
+| viewer_id     | int     |
+| view_date     | date    |
++---------------+---------+
+There is no primary key for this table, it may have duplicate rows.
+Each row of this table indicates that some viewer viewed an article (written by some author) on some date.
+Note that equal author_id and viewer_id indicate the same person.
 
-+-----+--------------+
-| id  | CandidateId  |
-+-----+--------------+
-| 1   |     2        |
-| 2   |     4        |
-| 3   |     3        |
-| 4   |     2        |
-| 5   |     5        |
-+-----+--------------+
-id is the auto-increment primary key,
-CandidateId is the id appeared in Candidate table.
-Write a sql to find the name of the winning candidate, the above example will return the winner B.
 
+Write an SQL query to find all the people who viewed more than one article on the same date, sorted in ascending order by their id.
+
+The query result format is in the following example:
+
+Views table:
++------------+-----------+-----------+------------+
+| article_id | author_id | viewer_id | view_date  |
++------------+-----------+-----------+------------+
+| 1          | 3         | 5         | 2019-08-01 |
+| 3          | 4         | 5         | 2019-08-01 |
+| 1          | 3         | 6         | 2019-08-02 |
+| 2          | 7         | 7         | 2019-08-01 |
+| 2          | 7         | 6         | 2019-08-02 |
+| 4          | 7         | 1         | 2019-07-22 |
+| 3          | 4         | 4         | 2019-07-21 |
+| 3          | 4         | 4         | 2019-07-21 |
++------------+-----------+-----------+------------+
+
+Result table:
 +------+
-| Name |
+| id   |
 +------+
-| B    |
+| 5    |
+| 6    |
 +------+
 */
 
-SELECT name
-FROM candidate
-WHERE id = (SELECT candidateid
-FROM vote
-GROUP BY candidateid
-ORDER BY COUNT(candidateid) DESC
-LIMIT 1)
+SELECT DISTINCT viewer_id as id
+FROM views
+GROUP BY view_date, viewer_id
+HAVING COUNT(DISTINCT article_id) > 1
+ORDER BY 1

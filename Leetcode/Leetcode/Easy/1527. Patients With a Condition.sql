@@ -1,45 +1,48 @@
 /*
 SQL Schema
-Query the customer_number from the orders table for the customer who has placed the largest number of orders.
+Table: Patients
 
-It is guaranteed that exactly one customer will have placed more orders than any other customer.
++--------------+---------+
+| Column Name  | Type    |
++--------------+---------+
+| patient_id   | int     |
+| patient_name | varchar |
+| conditions   | varchar |
++--------------+---------+
+patient_id is the primary key for this table.
+'conditions' contains 0 or more code separated by spaces.
+This table contains information of the patients in the hospital.
 
-The orders table is defined as follows:
 
-| Column            | Type      |
-|-------------------|-----------|
-| order_number (PK) | int       |
-| customer_number   | int       |
-| order_date        | date      |
-| required_date     | date      |
-| shipped_date      | date      |
-| status            | char(15)  |
-| comment           | char(200) |
-Sample Input
+Write an SQL query to report the patient_id, patient_name all conditions of patients who have Type I Diabetes. Type I Diabetes always starts with DIAB1 prefix
 
-| order_number | customer_number | order_date | required_date | shipped_date | status | comment |
-|--------------|-----------------|------------|---------------|--------------|--------|---------|
-| 1            | 1               | 2017-04-09 | 2017-04-13    | 2017-04-12   | Closed |         |
-| 2            | 2               | 2017-04-15 | 2017-04-20    | 2017-04-18   | Closed |         |
-| 3            | 3               | 2017-04-16 | 2017-04-25    | 2017-04-20   | Closed |         |
-| 4            | 3               | 2017-04-18 | 2017-04-28    | 2017-04-25   | Closed |         |
-Sample Output
+Return the result table in any order.
 
-| customer_number |
-|-----------------|
-| 3               |
-Explanation
+The query result format is in the following example.
 
-The customer with number '3' has two orders, which is greater than either customer '1' or '2' because each of them  only has one order.
-So the result is customer_number '3'.
+
+
+Patients
++------------+--------------+--------------+
+| patient_id | patient_name | conditions   |
++------------+--------------+--------------+
+| 1          | Daniel       | YFEV COUGH   |
+| 2          | Alice        |              |
+| 3          | Bob          | DIAB100 MYOP |
+| 4          | George       | ACNE DIAB100 |
+| 5          | Alain        | DIAB201      |
++------------+--------------+--------------+
+
+Result table:
++------------+--------------+--------------+
+| patient_id | patient_name | conditions   |
++------------+--------------+--------------+
+| 3          | Bob          | DIAB100 MYOP |
+| 4          | George       | ACNE DIAB100 |
++------------+--------------+--------------+
+Bob and George both have a condition that starts with DIAB1.
 */
 
-SELECT x.customer_number
-FROM
-(
-SELECT COUNT(order_number), customer_number
-FROM orders
-GROUP BY customer_number
-ORDER BY 1 DESC
-LIMIT 1
-)x
+SELECT patient_id, patient_name, conditions
+FROM patients
+WHERE conditions LIKE '%DIAB1%'
