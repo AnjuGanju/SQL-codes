@@ -1,4 +1,5 @@
 /*
+SQL Schema
 Table: Activity
 
 +---------------+---------+
@@ -44,18 +45,9 @@ Result table:
 | 2019-07-21 | 2            |
 +------------+--------------+
 Note that we do not care about days with zero active users.
-
 */
 
 SELECT activity_date as day, COUNT(DISTINCT user_id) as active_users
-FROM activity a
-WHERE a.activity_date BETWEEN '2019-06-28' AND '2019-07-27'
-GROUP BY activity_date
-HAVING SUM(session_id) >= 1
-
-
-SELECT activity_date as day, COUNT(DISTINCT user_id) as active_users
-FROM activity a
-WHERE datediff('2019-07-27', activity_date) <30
-GROUP BY activity_date
-HAVING SUM(session_id) >= 1
+FROM activity
+WHERE DATEDIFF('2019-07-27',activity_date) < 30
+GROUP BY 1
